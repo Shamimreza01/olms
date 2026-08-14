@@ -50,7 +50,7 @@ const authLimiter = rateLimit({
 });
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "https://onnorokomlms.netlify.app",
+    origin: process.env.CLIENT_URL || "http://localhost:5173n",
     credentials: true,
   }),
 );

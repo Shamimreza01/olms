@@ -128,7 +128,9 @@ export const login = async (req, res) => {
     }
 
     const accessToken = generateAccessToken(user);
+    console.log("Access Token:", accessToken); // Log the access token for debugging
     const refreshToken = generateRefreshToken(user._id);
+    console.log("Refresh Token:", refreshToken); // Log the refresh token for debugging
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
 
     user.refreshTokenHash = hashedRefreshToken;
