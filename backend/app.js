@@ -55,7 +55,7 @@ app.use("/api/auth/register", authLimiter);
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: process.env.CLIENT_URL || "https://onnorokomlms.netlify.app/",
     credentials: true,
   }),
 );
@@ -74,8 +74,6 @@ app.use((req, res, next) => {
   }
   next();
 });
-
-
 
 app.use(checkMaintenance);
 
