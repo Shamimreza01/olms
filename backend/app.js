@@ -3,7 +3,6 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import mongoSanitize from "express-mongo-sanitize";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import checkMaintenance from "./middlewares/checkMaintenance.middleware.js";
@@ -48,31 +47,21 @@ const authLimiter = rateLimit({
       "Too many login/register attempts. Please try again after 15 minutes.",
   },
 });
-
-app.use("/api", apiLimiter);
-app.use("/api/auth/login", authLimiter);
-app.use("/api/auth/register", authLimiter);
 app.use(
   cors({
     origin: process.env.CLIENT_URL || "https://onnorokomlms.netlify.app",
     credentials: true,
   }),
 );
+app.use("/api", apiLimiter);
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth/register", authLimiter);
 
 app.use(compression({ level: 6, threshold: 1024 }));
 
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 app.use(cookieParser());
-
-app.use((req, res, next) => {
-  if (req.body) mongoSanitize.sanitize(req.body);
-  if (req.params) mongoSanitize.sanitize(req.params);
-  if (req.query && typeof req.query === "object") {
-    mongoSanitize.sanitize(req.query);
-  }
-  next();
-});
 
 app.use(checkMaintenance);
 
