@@ -52,10 +52,9 @@ const authLimiter = rateLimit({
 app.use("/api", apiLimiter);
 app.use("/api/auth/login", authLimiter);
 app.use("/api/auth/register", authLimiter);
-
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "https://onnorokomlms.netlify.app/",
+    origin: process.env.CLIENT_URL || "https://onnorokomlms.netlify.app",
     credentials: true,
   }),
 );
