@@ -1,7 +1,7 @@
-import winston from "winston";
-import path from "path";
 import fs from "fs";
-
+import path from "path";
+import winston from "winston";
+// now we desible it for production, because we are using morgan for logging http requests
 // Ensure logs directory exists
 const logDir = path.join(process.cwd(), "logs");
 if (!fs.existsSync(logDir)) {
@@ -22,7 +22,7 @@ const logFormat = winston.format.combine(
       log += `\n${stack}`;
     }
     return log;
-  })
+  }),
 );
 
 export const logger = winston.createLogger({
@@ -30,10 +30,7 @@ export const logger = winston.createLogger({
   format: logFormat,
   transports: [
     new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        logFormat
-      ),
+      format: winston.format.combine(winston.format.colorize(), logFormat),
     }),
     new winston.transports.File({
       filename: path.join(logDir, "error.log"),
@@ -49,11 +46,19 @@ export const logger = winston.createLogger({
   ],
 });
 
-export const logAuditEvent = (req, { actorId, action, targetModel, targetId, details }) => {
-  const ip = req ? req.headers["x-forwarded-for"] || req.socket?.remoteAddress || req.ip : "system";
-  logger.info(`[AUDIT] Action: ${action} | Actor: ${actorId || "Guest/System"} | Target: ${targetModel || "N/A"}:${targetId || "N/A"} | IP: ${ip}`, {
-    details,
-  });
+export const logAuditEvent = (
+  req,
+  { actorId, action, targetModel, targetId, details },
+) => {
+  const ip = req
+    ? req.headers["x-forwarded-for"] || req.socket?.remoteAddress || req.ip
+    : "system";
+  logger.info(
+    `[AUDIT] Action: ${action} | Actor: ${actorId || "Guest/System"} | Target: ${targetModel || "N/A"}:${targetId || "N/A"} | IP: ${ip}`,
+    {
+      details,
+    },
+  );
 };
 
 export default logger;

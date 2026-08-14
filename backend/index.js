@@ -1,6 +1,5 @@
 import app from "./app.js";
 import connectDB from "./configs/mongodb.js";
-import { logger } from "./utils/logger.js";
 import seedInitialData from "./utils/seed.js";
 
 const PORT = process.env.PORT || 3000;
@@ -10,10 +9,10 @@ connectDB()
   .then(async () => {
     await seedInitialData();
     app.listen(PORT, () => {
-      logger.info(`🚀 Server running on http://localhost:${PORT}`);
+      console.log(`🚀 Server running on http://localhost:${PORT}`);
     });
   })
   .catch((error) => {
-    logger.error(`❌ MongoDB connection failed: ${error.message}`);
+    console.log(`❌ MongoDB connection failed: ${error.message}`);
     process.exit(1);
   });

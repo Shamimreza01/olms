@@ -6,9 +6,7 @@ import express from "express";
 import mongoSanitize from "express-mongo-sanitize";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
-import morgan from "morgan";
 import checkMaintenance from "./middlewares/checkMaintenance.middleware.js";
-import { logger } from "./utils/logger.js";
 
 // Routes
 import assignmentRoutes from "./routes/assignment.routes.js";
@@ -77,10 +75,10 @@ app.use((req, res, next) => {
   next();
 });
 
-const morganStream = {
-  write: (message) => logger.info(message.trim()),
-};
-app.use(morgan("combined", { stream: morganStream }));
+// const morganStream = {
+//   write: (message) => logger.info(message.trim()),
+// };
+// app.use(morgan("combined", { stream: morganStream }));
 
 app.use(checkMaintenance);
 
@@ -105,7 +103,6 @@ app.use((req, res) => {
 
 // Global Error Handler
 app.use((err, req, res, next) => {
-  logger.error("Unhandled express error:", err);
   res.status(err.status || 500).json({
     message: err.message || "Internal server error",
   });
