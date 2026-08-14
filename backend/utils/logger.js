@@ -1,4 +1,4 @@
-import fs from "fs";
+/*import fs from "fs";
 import path from "path";
 import winston from "winston";
 // now we desible it for production, because we are using morgan for logging http requests
@@ -62,3 +62,4 @@ export const logAuditEvent = (
 };
 
 export default logger;
+*/

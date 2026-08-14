@@ -51,7 +51,6 @@ The system is designed around three distinct roles, each with its own set of res
 - Cloudinary-based file storage
 - HTTP-only cookie-based authentication
 - Request throttling and HTTP security headers
-- Application and HTTP request logging
 - Automated backend API tests
 
 ---
@@ -123,8 +122,6 @@ Students can submit or resubmit work before grading. Once a submission has been 
 - Mongoose 9 for MongoDB object modeling
 - JSON Web Tokens for authentication
 - bcrypt for password hashing
-- Winston for application logging
-- Morgan for HTTP request logging
 - Helmet for HTTP security headers
 - express-rate-limit for request throttling
 - express-mongo-sanitize for NoSQL injection prevention

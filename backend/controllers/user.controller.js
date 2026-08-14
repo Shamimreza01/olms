@@ -1,6 +1,5 @@
 import User from "../models/user.model.js";
 import Subject from "../models/subject.model.js";
-import { logger, logAuditEvent } from "../utils/logger.js";
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -19,7 +18,6 @@ export const getAllUsers = async (req, res) => {
 
     res.status(200).json({ users });
   } catch (error) {
-    logger.error("getAllUsers error:", error);
     res.status(500).json({ message: "Failed to fetch users" });
   }
 };
@@ -41,17 +39,8 @@ export const updateUserStatus = async (req, res) => {
     user.currentStatus = currentStatus;
     await user.save();
 
-    logAuditEvent(req, {
-      actorId: req.user.id,
-      action: "UPDATE_USER_STATUS",
-      targetModel: "User",
-      targetId: user._id,
-      details: { email: user.email, newStatus: currentStatus },
-    });
-
     res.status(200).json({ message: `User status updated to ${currentStatus}`, user });
   } catch (error) {
-    logger.error("updateUserStatus error:", error);
     res.status(500).json({ message: "Failed to update user status" });
   }
 };
@@ -76,29 +65,18 @@ export const updateUser = async (req, res) => {
 
     // If teacher's assigned subjects are updated, sync Subject model's assignedTeachers
     if (user.role === "teacher" && Array.isArray(assignedSubjects)) {
-      // Add teacher to selected subjects
       await Subject.updateMany(
         { _id: { $in: assignedSubjects } },
         { $addToSet: { assignedTeachers: userId } }
       );
-      // Remove teacher from non-selected subjects
       await Subject.updateMany(
         { _id: { $nin: assignedSubjects } },
         { $pull: { assignedTeachers: userId } }
       );
     }
 
-    logAuditEvent(req, {
-      actorId: req.user.id,
-      action: "UPDATE_USER",
-      targetModel: "User",
-      targetId: user._id,
-      details: { role: user.role, classId: user.classId, assignedClasses: user.assignedClasses },
-    });
-
     res.status(200).json({ message: "User updated successfully", user });
   } catch (error) {
-    logger.error("updateUser error:", error);
     res.status(500).json({ message: "Failed to update user" });
   }
 };
@@ -119,16 +97,8 @@ export const deleteUser = async (req, res) => {
       );
     }
 
-    logAuditEvent(req, {
-      actorId: req.user.id,
-      action: "DELETE_USER",
-      targetModel: "User",
-      targetId: userId,
-    });
-
     res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
-    logger.error("deleteUser error:", error);
     res.status(500).json({ message: "Failed to delete user" });
   }
 };
@@ -142,7 +112,6 @@ export const getTeachers = async (req, res) => {
       .lean();
     res.status(200).json({ teachers });
   } catch (error) {
-    logger.error("getTeachers error:", error);
     res.status(500).json({ message: "Failed to fetch teachers" });
   }
 };
@@ -156,7 +125,6 @@ export const getStudents = async (req, res) => {
       .lean();
     res.status(200).json({ students });
   } catch (error) {
-    logger.error("getStudents error:", error);
     res.status(500).json({ message: "Failed to fetch students" });
   }
 };

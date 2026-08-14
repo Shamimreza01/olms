@@ -1,6 +1,5 @@
 import Submission from "../models/submission.model.js";
 import Assignment from "../models/assignment.model.js";
-import { logger, logAuditEvent } from "../utils/logger.js";
 import {
   uploadToCloudinary,
   deleteFromCloudinary,
@@ -53,7 +52,6 @@ export const getSubmissions = async (req, res) => {
 
     res.status(200).json({ submissions });
   } catch (error) {
-    logger.error("getSubmissions error:", error);
     res.status(500).json({ message: "Failed to fetch submissions" });
   }
 };
@@ -101,7 +99,6 @@ export const submitAssignment = async (req, res) => {
           },
         ];
       } catch (uploadErr) {
-        logger.error("Cloudinary upload error (submission):", uploadErr);
         return res
           .status(500)
           .json({ message: "File upload failed. Please try again." });
@@ -133,14 +130,6 @@ export const submitAssignment = async (req, res) => {
 
       await submission.save();
 
-      logAuditEvent(req, {
-        actorId: studentId,
-        action: "UPDATE_SUBMISSION",
-        targetModel: "Submission",
-        targetId: submission._id,
-        details: { assignmentId, status: submission.status },
-      });
-
       return res
         .status(200)
         .json({ message: "Submission updated successfully", submission });
@@ -157,19 +146,10 @@ export const submitAssignment = async (req, res) => {
 
     await submission.save();
 
-    logAuditEvent(req, {
-      actorId: studentId,
-      action: "CREATE_SUBMISSION",
-      targetModel: "Submission",
-      targetId: submission._id,
-      details: { assignmentId, status: submission.status },
-    });
-
     res
       .status(201)
       .json({ message: "Assignment submitted successfully", submission });
   } catch (error) {
-    logger.error("submitAssignment error:", error);
     res.status(500).json({ message: "Failed to submit assignment" });
   }
 };
@@ -203,19 +183,10 @@ export const gradeSubmission = async (req, res) => {
 
     await submission.save();
 
-    logAuditEvent(req, {
-      actorId: req.user.id,
-      action: "GRADE_SUBMISSION",
-      targetModel: "Submission",
-      targetId: submission._id,
-      details: { marks, status: submission.status },
-    });
-
     res
       .status(200)
       .json({ message: "Submission graded successfully", submission });
   } catch (error) {
-    logger.error("gradeSubmission error:", error);
     res.status(500).json({ message: "Failed to grade submission" });
   }
 };
@@ -241,19 +212,10 @@ export const updateSubmissionStatus = async (req, res) => {
     submission.status = status;
     await submission.save();
 
-    logAuditEvent(req, {
-      actorId: req.user.id,
-      action: "UPDATE_SUBMISSION_STATUS",
-      targetModel: "Submission",
-      targetId: submission._id,
-      details: { status },
-    });
-
     res
       .status(200)
       .json({ message: `Submission status updated to ${status}`, submission });
   } catch (error) {
-    logger.error("updateSubmissionStatus error:", error);
     res.status(500).json({ message: "Failed to update submission status" });
   }
 };

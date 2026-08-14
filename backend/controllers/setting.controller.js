@@ -1,5 +1,4 @@
 import Setting from "../models/setting.model.js";
-import { logger, logAuditEvent } from "../utils/logger.js";
 
 export const getPublicSettings = async (req, res) => {
   try {
@@ -20,7 +19,6 @@ export const getPublicSettings = async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error("getPublicSettings error:", error);
     res.status(500).json({ message: "Failed to fetch public settings" });
   }
 };
@@ -35,7 +33,6 @@ export const getAdminSettings = async (req, res) => {
 
     res.status(200).json({ setting });
   } catch (error) {
-    logger.error("getAdminSettings error:", error);
     res.status(500).json({ message: "Failed to fetch settings" });
   }
 };
@@ -69,16 +66,8 @@ export const updateSettings = async (req, res) => {
 
     await setting.save();
 
-    logAuditEvent(req, {
-      actorId: req.user.id,
-      action: "UPDATE_SYSTEM_SETTINGS",
-      targetModel: "Setting",
-      targetId: setting._id,
-    });
-
     res.status(200).json({ message: "Settings updated successfully", setting });
   } catch (error) {
-    logger.error("updateSettings error:", error);
     res.status(500).json({ message: "Failed to update settings" });
   }
 };

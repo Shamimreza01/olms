@@ -8,7 +8,6 @@ import {
 import Setting from "../models/setting.model.js";
 import User from "../models/user.model.js";
 import getUserStatus from "../utils/getUserStatus.js";
-import { logAuditEvent, logger } from "../utils/logger.js";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -49,19 +48,11 @@ export const studentRegistration = async (req, res) => {
     });
 
     await user.save();
-    logAuditEvent(req, {
-      actorId: user._id,
-      action: "STUDENT_REGISTER",
-      targetModel: "User",
-      targetId: user._id,
-      details: { email, role: "student" },
-    });
 
     res.status(201).json({
       message: "Student registered successfully. Awaiting admin approval.",
     });
   } catch (error) {
-    logger.error("Student registration error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -104,19 +95,11 @@ export const teacherRegistration = async (req, res) => {
     });
 
     await user.save();
-    logAuditEvent(req, {
-      actorId: user._id,
-      action: "TEACHER_REGISTER",
-      targetModel: "User",
-      targetId: user._id,
-      details: { email, role: "teacher" },
-    });
 
     res.status(201).json({
       message: "Teacher registered successfully. Awaiting admin approval.",
     });
   } catch (error) {
-    logger.error("Teacher registration error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -154,17 +137,8 @@ export const login = async (req, res) => {
     res.cookie("accessToken", accessToken, accessCookieOptions);
     res.cookie("refreshToken", refreshToken, refreshCookieOptions);
 
-    logAuditEvent(req, {
-      actorId: user._id,
-      action: "USER_LOGIN",
-      targetModel: "User",
-      targetId: user._id,
-      details: { email: user.email, role: user.role },
-    });
-
     return res.status(200).json({ message: "Login successful" });
   } catch (err) {
-    logger.error("Login error:", err);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -183,18 +157,8 @@ export const logout = async (req, res) => {
     res.clearCookie("accessToken", clearCookieOptions);
     res.clearCookie("refreshToken", clearCookieOptions);
 
-    if (userId) {
-      logAuditEvent(req, {
-        actorId: userId,
-        action: "USER_LOGOUT",
-        targetModel: "User",
-        targetId: userId,
-      });
-    }
-
     res.json({ message: "Logged out successfully." });
   } catch (error) {
-    logger.error("Logout error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -229,7 +193,6 @@ export const getCurrentUser = async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error("getCurrentUser error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

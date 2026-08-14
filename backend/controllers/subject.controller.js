@@ -1,5 +1,4 @@
 import Subject from "../models/subject.model.js";
-import { logger, logAuditEvent } from "../utils/logger.js";
 
 export const getAllSubjects = async (req, res) => {
   try {
@@ -23,7 +22,6 @@ export const getAllSubjects = async (req, res) => {
 
     res.status(200).json({ subjects });
   } catch (error) {
-    logger.error("getAllSubjects error:", error);
     res.status(500).json({ message: "Failed to fetch subjects" });
   }
 };
@@ -49,17 +47,8 @@ export const createSubject = async (req, res) => {
 
     await subject.save();
 
-    logAuditEvent(req, {
-      actorId: req.user.id,
-      action: "CREATE_SUBJECT",
-      targetModel: "Subject",
-      targetId: subject._id,
-      details: { name, code },
-    });
-
     res.status(201).json({ message: "Subject created successfully", subject });
   } catch (error) {
-    logger.error("createSubject error:", error);
     res.status(500).json({ message: "Failed to create subject" });
   }
 };
@@ -81,16 +70,8 @@ export const updateSubject = async (req, res) => {
 
     await subject.save();
 
-    logAuditEvent(req, {
-      actorId: req.user.id,
-      action: "UPDATE_SUBJECT",
-      targetModel: "Subject",
-      targetId: subject._id,
-    });
-
     res.status(200).json({ message: "Subject updated successfully", subject });
   } catch (error) {
-    logger.error("updateSubject error:", error);
     res.status(500).json({ message: "Failed to update subject" });
   }
 };
@@ -98,7 +79,7 @@ export const updateSubject = async (req, res) => {
 export const assignTeachersToSubject = async (req, res) => {
   try {
     const { subjectId } = req.params;
-    const { assignedTeachers } = req.body; // Array of user IDs
+    const { assignedTeachers } = req.body;
 
     const subject = await Subject.findById(subjectId);
     if (!subject) {
@@ -108,17 +89,8 @@ export const assignTeachersToSubject = async (req, res) => {
     subject.assignedTeachers = assignedTeachers || [];
     await subject.save();
 
-    logAuditEvent(req, {
-      actorId: req.user.id,
-      action: "ASSIGN_TEACHERS_TO_SUBJECT",
-      targetModel: "Subject",
-      targetId: subject._id,
-      details: { assignedTeachers },
-    });
-
     res.status(200).json({ message: "Teachers assigned successfully", subject });
   } catch (error) {
-    logger.error("assignTeachersToSubject error:", error);
     res.status(500).json({ message: "Failed to assign teachers" });
   }
 };
@@ -131,16 +103,8 @@ export const deleteSubject = async (req, res) => {
       return res.status(404).json({ message: "Subject not found" });
     }
 
-    logAuditEvent(req, {
-      actorId: req.user.id,
-      action: "DELETE_SUBJECT",
-      targetModel: "Subject",
-      targetId: subjectId,
-    });
-
     res.status(200).json({ message: "Subject deleted successfully" });
   } catch (error) {
-    logger.error("deleteSubject error:", error);
     res.status(500).json({ message: "Failed to delete subject" });
   }
 };

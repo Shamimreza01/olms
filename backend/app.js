@@ -75,10 +75,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// const morganStream = {
-//   write: (message) => logger.info(message.trim()),
-// };
-// app.use(morgan("combined", { stream: morganStream }));
+
 
 app.use(checkMaintenance);
 

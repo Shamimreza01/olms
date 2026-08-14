@@ -1,10 +1,10 @@
+import {
+  deleteFromCloudinary,
+  uploadToCloudinary,
+} from "../middlewares/upload.middleware.js";
 import Assignment from "../models/assignment.model.js";
 import User from "../models/user.model.js";
-import { logAuditEvent, logger } from "../utils/logger.js";
-import {
-  uploadToCloudinary,
-  deleteFromCloudinary,
-} from "../middlewares/upload.middleware.js";
+
 
 export const getAssignments = async (req, res) => {
   try {
@@ -44,7 +44,6 @@ export const getAssignments = async (req, res) => {
 
     res.status(200).json({ assignments });
   } catch (error) {
-    logger.error("getAssignments error:", error);
     res.status(500).json({ message: "Failed to fetch assignments" });
   }
 };
@@ -70,7 +69,6 @@ export const getAssignmentById = async (req, res) => {
 
     res.status(200).json({ assignment });
   } catch (error) {
-    logger.error("getAssignmentById error:", error);
     res.status(500).json({ message: "Failed to fetch assignment details" });
   }
 };
@@ -89,15 +87,18 @@ export const createAssignment = async (req, res) => {
 
     if (!title || !description || !classId || !subjectId || !deadline) {
       return res.status(400).json({
-        message: "Title, description, class, subject, and deadline are required",
+        message:
+          "Title, description, class, subject, and deadline are required",
       });
     }
 
-    // ── Handle file upload to Cloudinary ──────────────────────
     let attachments = [];
     if (req.file) {
       try {
-        const uploaded = await uploadToCloudinary(req.file, "onnorokomlms/assignments");
+        const uploaded = await uploadToCloudinary(
+          req.file,
+          "onnorokomlms/assignments",
+        );
         attachments = [
           {
             fileName: uploaded.originalName,
@@ -107,7 +108,6 @@ export const createAssignment = async (req, res) => {
           },
         ];
       } catch (uploadErr) {
-        logger.error("Cloudinary upload error (assignment):", uploadErr);
         return res
           .status(500)
           .json({ message: "File upload failed. Please try again." });
@@ -128,19 +128,10 @@ export const createAssignment = async (req, res) => {
 
     await assignment.save();
 
-    logAuditEvent(req, {
-      actorId: req.user.id,
-      action: "CREATE_ASSIGNMENT",
-      targetModel: "Assignment",
-      targetId: assignment._id,
-      details: { title, status: assignment.status },
-    });
-
     res
       .status(201)
       .json({ message: "Assignment created successfully", assignment });
   } catch (error) {
-    logger.error("createAssignment error:", error);
     res.status(500).json({ message: "Failed to create assignment" });
   }
 };
@@ -181,7 +172,6 @@ export const updateAssignment = async (req, res) => {
     if (maxMarks !== undefined) assignment.maxMarks = maxMarks;
     if (status) assignment.status = status;
 
-    // ── Handle file replacement / removal ─────────────────────
     if (req.file) {
       // Delete old file from Cloudinary before replacing
       const oldAtt = assignment.attachments?.[0];
@@ -190,7 +180,10 @@ export const updateAssignment = async (req, res) => {
       }
 
       try {
-        const uploaded = await uploadToCloudinary(req.file, "onnorokomlms/assignments");
+        const uploaded = await uploadToCloudinary(
+          req.file,
+          "onnorokomlms/assignments",
+        );
         assignment.attachments = [
           {
             fileName: uploaded.originalName,
@@ -200,7 +193,6 @@ export const updateAssignment = async (req, res) => {
           },
         ];
       } catch (uploadErr) {
-        logger.error("Cloudinary upload error (updateAssignment):", uploadErr);
         return res
           .status(500)
           .json({ message: "File upload failed. Please try again." });
@@ -216,19 +208,10 @@ export const updateAssignment = async (req, res) => {
 
     await assignment.save();
 
-    logAuditEvent(req, {
-      actorId: req.user.id,
-      action: "UPDATE_ASSIGNMENT",
-      targetModel: "Assignment",
-      targetId: assignment._id,
-      details: { status: assignment.status },
-    });
-
     res
       .status(200)
       .json({ message: "Assignment updated successfully", assignment });
   } catch (error) {
-    logger.error("updateAssignment error:", error);
     res.status(500).json({ message: "Failed to update assignment" });
   }
 };
@@ -250,7 +233,6 @@ export const deleteAssignment = async (req, res) => {
         .json({ message: "Not authorized to delete this assignment" });
     }
 
-    // ── Delete attached file from Cloudinary ──────────────────
     const oldAtt = assignment.attachments?.[0];
     if (oldAtt?.publicId) {
       await deleteFromCloudinary(oldAtt.publicId, oldAtt.resourceType);
@@ -258,16 +240,8 @@ export const deleteAssignment = async (req, res) => {
 
     await Assignment.findByIdAndDelete(assignmentId);
 
-    logAuditEvent(req, {
-      actorId: req.user.id,
-      action: "DELETE_ASSIGNMENT",
-      targetModel: "Assignment",
-      targetId: assignmentId,
-    });
-
     res.status(200).json({ message: "Assignment deleted successfully" });
   } catch (error) {
-    logger.error("deleteAssignment error:", error);
     res.status(500).json({ message: "Failed to delete assignment" });
   }
 };

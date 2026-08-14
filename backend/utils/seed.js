@@ -1,7 +1,6 @@
 import bcrypt from "bcrypt";
 import User from "../models/user.model.js";
 import Setting from "../models/setting.model.js";
-import { logger } from "./logger.js";
 
 export const seedInitialData = async () => {
   try {
@@ -17,7 +16,7 @@ export const seedInitialData = async () => {
         teacherSecretKey: "teacher123",
       });
       await setting.save();
-      logger.info("🌱 Default system settings seeded.");
+      console.log("Default system settings seeded.");
     }
 
     // 2. Ensure Admin User exists
@@ -32,10 +31,10 @@ export const seedInitialData = async () => {
         currentStatus: "approved",
       });
       await defaultAdmin.save();
-      logger.info("🌱 Default Admin created: admin@oschool.com / admin123");
+      console.log("Default Admin created: admin@oschool.com / admin123");
     }
   } catch (error) {
-    logger.error("Error during initial data seed:", error);
+    console.error("Error during initial data seed:", error);
   }
 };
 
