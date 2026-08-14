@@ -54,9 +54,6 @@ app.use(
     credentials: true,
   }),
 );
-app.use("/api", apiLimiter);
-app.use("/api/auth/login", authLimiter);
-app.use("/api/auth/register", authLimiter);
 
 app.use(compression({ level: 6, threshold: 1024 }));
 
